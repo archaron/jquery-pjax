@@ -685,17 +685,22 @@ function optionsFor(container, options) {
 //
 // Returns a jQuery object whose context is `document` and has a selector.
 function findContainerFor(container) {
-  container = $(container)
+    var formatedContainer
 
-  if ( !container.length ) {
-    throw "no pjax container for " + container.selector
-  } else if ( container.selector !== '' && container.context === document ) {
-    return container
-  } else if ( container.attr('id') ) {
-    return $('#' + container.attr('id'))
-  } else {
-    throw "cant get selector for pjax container!"
-  }
+    if (jQuery.type(container) === 'string') {
+        formatedContainer = $(container)
+        formatedContainer.selector = container
+    } else {
+        formatedContainer = container
+    }
+
+    if (!formatedContainer.length) {
+        throw "no pjax container for " + container
+    } else if (!formatedContainer.selector) {
+        throw "cant get selector for pjax container"
+    } else {
+        return formatedContainer
+    }
 }
 
 // Internal: Filter and find all elements matching the selector.
@@ -977,8 +982,11 @@ function disable() {
 
 // Add the state property to jQuery's event object so we can use it in
 // $(window).bind('popstate')
-if ( $.inArray('state', $.event.props) < 0 )
-  $.event.props.push('state')
+if ($.event.props && $.inArray('state', $.event.props) < 0) {
+    $.event.props.push('state')
+} else if (!('state' in $.Event.prototype)) {
+    $.event.addProp('state')
+}
 
 // Is pjax supported by this browser?
 $.support.pjax =
